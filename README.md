@@ -5,41 +5,34 @@ A collaborative web application for multi-user synchronized trip planning.
 ## Overview
 
 Trip Planner enables users to:
-- Plan trips together in real-time
+- Plan trips together in real-time with **Live Cursors** and **Team Chat**
 - View and manage routes on interactive maps (Google Maps)
 - Create daily itineraries with time and location details
-- Track attractions and highlights
-- Manage transportation methods and tickets
+- Track attractions and highlights with AI assistance
+- Manage transportation methods, flights, and tickets
 - Organize important documents and files
-- Split expenses and manage budgets
-- Get AI-assisted planning suggestions
+- Split expenses and manage budgets in multiple currencies
+- Get AI-assisted planning suggestions via **Floating AI Chat**
 
 ## Core Features
 
-1. **Homepage** - Multiple trip plans hub
-2. **Map Functionality** - Google Maps integration with route planning and waypoint management
-3. **Daily Itinerary** - Schedule tables with time, location, and themes
-4. **Attractions & Highlights** - Track must-see places and artwork
-5. **Transportation** - Mode selection and ticket management
-6. **Document Folder** - Store tickets, PDFs, and important files
-
-## Advanced Features
-
-1. **Route Optimization** - Auto-optimize travel routes
-2. **Task Assignment** - Assign responsibilities with @mentions and voting
-3. **Wikipedia Integration** - Auto-populate attraction information
-4. **Expense Splitting** - Track shared costs and budget management
-5. **QR Code Support** - Upload QR codes for tickets
-6. **AI Assistance** - Planning suggestions and recommendations
+1. **Map Functionality** - Google Maps integration with route planning, waypoint management, and live distance/duration metrics.
+2. **Daily Itinerary** - Schedule tables with time, location, and drag-and-drop themes.
+3. **Attractions & Highlights** - Track must-see places, Wikipedia integration, and nearby famous sites.
+4. **Transportation & Flights** - Mode selection (driving, transit, walking, bicycling) and flight ticket management.
+5. **Document Folder** - Upload and store tickets, PDFs, and important files.
+6. **Expense Splitting** - Track shared costs, manage budgets, and convert currencies.
+7. **Real-time Collaboration** - See where your friends are pointing with live cursors and chat together.
+8. **AI Chat Assistant** - Floating AI assistant that analyzes routes and suggests optimizing strategies.
 
 ## Tech Stack
 
-- **Frontend**: React 18, Next.js 14, TypeScript, Tailwind CSS
-- **Maps**: Google Maps API
+- **Frontend**: React 18, Next.js 14, TypeScript
+- **Backend**: Python, FastAPI, Uvicorn
+- **Maps**: Google Maps API, Nominatim (Fallback)
 - **State Management**: Zustand
-- **HTTP Client**: Axios
 - **Styling**: Tailwind CSS
-- **Linting**: ESLint
+- **Linting**: ESLint, TypeScript Type-Checking
 
 ## Getting Started
 
@@ -51,10 +44,10 @@ Trip Planner enables users to:
 
 ### Installation
 
-#### 1. Frontend (Next.js) Setup
+#### 1. Frontend Setup
 ```bash
 # Clone the repository
-git clone https://github.com/b13401084-jpg/Trip-Planner.git
+git clone https://github.com/ZhouFang-sui/Trip-Planner.git
 cd Trip-Planner
 
 # Install frontend dependencies
@@ -64,99 +57,85 @@ npm install
 cp .env.example .env.local
 
 # Add your API keys to .env.local
-# - Google Maps API Key
-# - Other required credentials
+# - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+# - NEXT_PUBLIC_API_URL (default: http://localhost:8000)
 ```
 
-#### 2. Backend (FastAPI) Setup
+#### 2. Python Backend Setup
 Ensure you have Python installed, then run:
 ```bash
-# Install backend python dependencies
+# Install backend dependencies
 pip install -r python_backend/requirements.txt
 
-# Create python env file (if needed, inside python_backend directory)
-# Create a .env file under python_backend/ with GEMINI_API_KEY
+# Create environment file for Python
+# Make sure to add GEMINI_API_KEY inside python_backend/.env
 ```
 
 ### Running the Application
 
-To run the full application, you need to start **both** servers concurrently.
+To run the full application, you need to start **both** servers. We provide a single script to start both concurrently:
 
-#### 1. Start the Python Backend Server
-From the root project directory, run:
 ```bash
-cd python_backend
-python -m uvicorn main:app --reload --port 8000
+# Start both Frontend and Python Backend concurrently
+npm run dev:all
 ```
-*The API server will run at http://localhost:8000.*
+*Frontend runs at `http://localhost:3000` and Backend API at `http://localhost:8000`.*
 
-#### 2. Start the Frontend Server
-In a **separate terminal window**, from the root project directory, run:
-```bash
-npm run dev
-```
-*The frontend application will run at http://localhost:3000.*
+Alternatively, run them separately:
+- **Frontend**: `npm run dev`
+- **Backend**: `cd python_backend && python -m uvicorn main:app --reload --port 8000`
 
 ### Building for Production
 
 ```bash
-# Build for production
+# Build the Next.js app
 npm run build
 
-# Start production server
+# Start the production server
 npm start
 ```
 
-### Type Checking
+### Type Checking & Linting
 
 ```bash
 # Run TypeScript type check
 npm run type-check
+
+# Run ESLint to check for code issues
+npm run lint
 ```
 
 ## Project Structure
 
-```
+```text
 Trip-Planner/
+├── python_backend/       # Python FastAPI backend for AI and data processing
+│   ├── main.py           # FastAPI application entry point
+│   └── requirements.txt  # Python dependencies
 ├── src/
-│   ├── app/              # Next.js app directory
-│   ├── components/       # Reusable React components
-│   ├── pages/            # API routes
+│   ├── app/              # Next.js App Router (Pages, Layouts)
+│   ├── components/       # Reusable React components (Map, Chat, Expense, Document, etc.)
+│   ├── context/          # React Context providers (LangContext)
 │   ├── store/            # Zustand state management
 │   ├── hooks/            # Custom React hooks
 │   ├── utils/            # Utility functions
 │   ├── types/            # TypeScript type definitions
-│   └── styles/           # Global styles
+│   └── styles/           # Global styles & Tailwind
 ├── public/               # Static assets
 ├── .env.example          # Environment variables template
-├── .gitignore            # Git ignore rules
-├── .eslintrc.json        # ESLint configuration
 ├── next.config.js        # Next.js configuration
-├── tsconfig.json         # TypeScript configuration
 ├── tailwind.config.ts    # Tailwind CSS configuration
-├── package.json          # Project dependencies
+├── package.json          # Project scripts and Node dependencies
 └── README.md             # This file
 ```
-
-## Environment Variables
-
-See `.env.example` for all required environment variables:
-
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - Google Maps API key
-- `DATABASE_URL` - Database connection string
-- `NEXT_AUTH_SECRET` - Authentication secret
-- Other third-party API keys
 
 ## Contributing
 
 1. Create a feature branch from `main`
 2. Make your changes
-3. Submit a pull request
+3. Run `npm run lint` and `npm run type-check` before committing
+4. Submit a pull request
 
 ## License
 
 MIT
-
-## Support
-
-For questions or issues, please open a GitHub issue.

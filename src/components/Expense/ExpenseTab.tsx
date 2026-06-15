@@ -195,7 +195,7 @@ export default function ExpenseTab({ currency = '$', expenses, setExpenses, itin
                 );
               })}
               {filteredExpenses.length === 0 && (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-400">No expenses. Click "+ Add"!</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-gray-400">No expenses. Click &quot;+ Add&quot;!</td></tr>
               )}
             </tbody>
           </table>

@@ -198,7 +198,7 @@ export default function RouteOptimizer({
       </div>
       
       <p className="text-xs text-indigo-700 mb-4 font-medium leading-relaxed">
-        Collaborating with others? We'll integrate all added places and calculate the absolute shortest path to save you time and travel costs.
+        Collaborating with others? We&apos;ll integrate all added places and calculate the absolute shortest path to save you time and travel costs.
       </p>
 
       <button

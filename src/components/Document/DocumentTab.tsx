@@ -126,7 +126,7 @@ export default function DocumentTab() {
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
             <span className="text-6xl mb-4">☁️</span>
             <p>Your drive is empty.</p>
-            <p className="text-sm">Click "+ Upload File" to add documents.</p>
+            <p className="text-sm">Click &quot;+ Upload File&quot; to add documents.</p>
           </div>
         )}
       </div>

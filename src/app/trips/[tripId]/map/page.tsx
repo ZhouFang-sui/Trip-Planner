@@ -878,7 +878,7 @@ export default function TripMapPage({ params }: { params: { tripId: string } }) 
                       </div>
                       
                       <p className="text-sm leading-relaxed text-slate-600 bg-indigo-50/50 p-4 rounded-xl border border-indigo-50 italic mt-2">
-                        "{placeInfo.description}"
+                        &quot;{placeInfo.description}&quot;
                       </p>
                       
                       {placeInfo.ai_introduction && (
