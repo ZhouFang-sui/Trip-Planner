@@ -47,15 +47,17 @@ Trip Planner enables users to:
 
 - Node.js >= 18.0.0
 - npm >= 9.0.0
+- Python >= 3.8
 
 ### Installation
 
+#### 1. Frontend (Next.js) Setup
 ```bash
 # Clone the repository
 git clone https://github.com/b13401084-jpg/Trip-Planner.git
 cd Trip-Planner
 
-# Install dependencies
+# Install frontend dependencies
 npm install
 
 # Create environment file
@@ -66,16 +68,36 @@ cp .env.example .env.local
 # - Other required credentials
 ```
 
-### Development
-
+#### 2. Backend (FastAPI) Setup
+Ensure you have Python installed, then run:
 ```bash
-# Start development server
-npm run dev
+# Install backend python dependencies
+pip install -r python_backend/requirements.txt
 
-# Open http://localhost:3000 in your browser
+# Create python env file (if needed, inside python_backend directory)
+# Create a .env file under python_backend/ with GEMINI_API_KEY
 ```
 
-### Building
+### Running the Application
+
+To run the full application, you need to start **both** servers concurrently.
+
+#### 1. Start the Python Backend Server
+From the root project directory, run:
+```bash
+cd python_backend
+python -m uvicorn main:app --reload --port 8000
+```
+*The API server will run at http://localhost:8000.*
+
+#### 2. Start the Frontend Server
+In a **separate terminal window**, from the root project directory, run:
+```bash
+npm run dev
+```
+*The frontend application will run at http://localhost:3000.*
+
+### Building for Production
 
 ```bash
 # Build for production
