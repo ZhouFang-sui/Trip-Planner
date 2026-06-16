@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function DocumentTab() {
   const [items, setItems] = useState<any[]>([
@@ -9,25 +9,53 @@ export default function DocumentTab() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/documents`);
+        if (res.ok) {
+          const data = await res.json();
+          setItems(prev => {
+            const folders = prev.filter(i => i.type === 'folder');
+            return [...folders, ...data.documents];
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch documents', err);
+      }
+    };
+    fetchDocuments();
+  }, []);
+
   const addFolder = () => {
     const name = prompt('Folder Name:');
     if (name) setItems([...items, { id: Date.now(), type: 'folder', name, size: '--', url: null, parentId: currentFolder }]);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newItems = Array.from(e.target.files).map(file => {
-        const url = URL.createObjectURL(file);
-        return {
-          id: Date.now() + Math.random(),
-          type: 'file',
-          name: file.name,
-          size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-          url: url,
-          parentId: currentFolder
-        };
-      });
-      setItems([...items, ...newItems]);
+      const files = Array.from(e.target.files);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+          const res = await fetch(`${apiUrl}/api/upload-document`, {
+            method: 'POST',
+            body: formData
+          });
+          if (res.ok) {
+            const data = await res.json();
+            data.parentId = currentFolder;
+            setItems(prev => [...prev, data]);
+          }
+        } catch (err) {
+          console.error('Failed to upload file', err);
+        }
+      }
     }
   };
 

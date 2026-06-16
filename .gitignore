@@ -38,3 +38,7 @@ yarn-error.log*
 
 # OS
 Thumbs.db
+
+# Ignore uploaded files
+python_backend/uploads/*
+!python_backend/uploads/.gitkeep

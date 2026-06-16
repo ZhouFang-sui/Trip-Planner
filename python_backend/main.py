@@ -1,4 +1,5 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, UploadFile
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -19,6 +20,10 @@ if os.getenv("GEMINI_API_KEY"):
         print(f"Error initializing Google GenAI Client: {e}")
 
 app = FastAPI()
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 class ConnectionManager:
     def __init__(self):
@@ -366,6 +371,47 @@ async def ai_chat(req: ChatMessage):
     else:
         # Fallback Mock AI when no API key is present
         return {"response": get_mock_response(req.message, is_overloaded=False)}
+
+@app.post("/api/upload-document")
+async def upload_document(file: UploadFile = File(...)):
+    import shutil
+    import uuid
+    
+    # Prepend UUID to avoid naming collisions
+    safe_name = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, safe_name)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {
+        "id": safe_name,
+        "type": "file",
+        "name": file.filename,
+        "size": f"{(os.path.getsize(file_path) / (1024 * 1024)):.2f} MB",
+        "url": f"http://localhost:8000/uploads/{safe_name}",
+        "parentId": None
+    }
+
+@app.get("/api/documents")
+async def list_documents():
+    files_list = []
+    if os.path.exists(UPLOAD_DIR):
+        for filename in os.listdir(UPLOAD_DIR):
+            file_path = os.path.join(UPLOAD_DIR, filename)
+            if os.path.isfile(file_path):
+                # Extract original name (everything after the first underscore)
+                parts = filename.split('_', 1)
+                orig_name = parts[1] if len(parts) > 1 else filename
+                files_list.append({
+                    "id": filename,
+                    "type": "file",
+                    "name": orig_name,
+                    "size": f"{(os.path.getsize(file_path) / (1024 * 1024)):.2f} MB",
+                    "url": f"http://localhost:8000/uploads/{filename}",
+                    "parentId": None
+                })
+    return {"documents": files_list}
 
 @app.websocket("/ws/trip/{trip_id}")
 async def websocket_endpoint(websocket: WebSocket, trip_id: str):
