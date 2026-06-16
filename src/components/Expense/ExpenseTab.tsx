@@ -97,14 +97,61 @@ export default function ExpenseTab({ currency = '$', expenses, setExpenses, itin
   const rawDebts = computeRawDebts(filteredExpenses);
   const dayTotal = filteredExpenses.reduce((s, e) => s + (parseFloat(String(e.amount)) || 0), 0);
 
-  // Aggregate debts by (from → to) pair for the summary view
-  const aggregated: Record<string, { from: string; to: string; total: number; items: string[] }> = {};
-  rawDebts.forEach(d => {
-    const key = `${d.from}→${d.to}`;
-    if (!aggregated[key]) aggregated[key] = { from: d.from, to: d.to, total: 0, items: [] };
-    aggregated[key].total += d.amount;
-    aggregated[key].items.push(`${d.because} (${currency}${d.amount.toFixed(2)})`);
+  // Find all unique people in filteredExpenses
+  const allPeopleSet = new Set<string>();
+  filteredExpenses.forEach(exp => {
+    if (exp.payer.trim()) allPeopleSet.add(exp.payer.trim().toLowerCase());
+    const shares = parseShares(exp);
+    Object.keys(shares).forEach(name => {
+      allPeopleSet.add(name.trim().toLowerCase());
+    });
   });
+  const allPeople = [...allPeopleSet].sort();
+
+  // 1. Calculate total raw amount person A owes person B
+  const pairwiseDebts: Record<string, Record<string, number>> = {};
+  allPeople.forEach(p1 => {
+    pairwiseDebts[p1] = {};
+    allPeople.forEach(p2 => {
+      pairwiseDebts[p1][p2] = 0;
+    });
+  });
+
+  rawDebts.forEach(d => {
+    if (pairwiseDebts[d.from] && pairwiseDebts[d.from][d.to] !== undefined) {
+      pairwiseDebts[d.from][d.to] += d.amount;
+    }
+  });
+
+  // 2. Net them out: if A owes B X, and B owes A Y:
+  // if X > Y, net is A owes B (X - Y), and B owes A 0.
+  const netDebts: Record<string, Record<string, number>> = {};
+  allPeople.forEach(p1 => {
+    netDebts[p1] = {};
+    allPeople.forEach(p2 => {
+      netDebts[p1][p2] = 0;
+    });
+  });
+
+  for (let i = 0; i < allPeople.length; i++) {
+    for (let j = i + 1; j < allPeople.length; j++) {
+      const p1 = allPeople[i];
+      const p2 = allPeople[j];
+      const p1OwesP2 = pairwiseDebts[p1][p2] || 0;
+      const p2OwesP1 = pairwiseDebts[p2][p1] || 0;
+
+      if (p1OwesP2 > p2OwesP1) {
+        netDebts[p1][p2] = p1OwesP2 - p2OwesP1;
+        netDebts[p2][p1] = 0;
+      } else if (p2OwesP1 > p1OwesP2) {
+        netDebts[p2][p1] = p2OwesP1 - p1OwesP2;
+        netDebts[p1][p2] = 0;
+      } else {
+        netDebts[p1][p2] = 0;
+        netDebts[p2][p1] = 0;
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -269,26 +316,44 @@ export default function ExpenseTab({ currency = '$', expenses, setExpenses, itin
           </div>
 
           {/* Aggregated total settlements */}
-          {Object.keys(aggregated).length > 0 && (
+          {allPeople.length > 0 && (
             <div>
               <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">🤝 Total Amount Each Person Owes</h4>
-              <div className="space-y-2">
-                {Object.values(aggregated).sort((a, b) => b.total - a.total).map((agg, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
-                    <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-black text-sm uppercase shrink-0">{agg.from[0]}</div>
-                    <div className="flex-1">
-                      <span className="font-semibold text-gray-800 capitalize">{agg.from}</span>
-                      <div className="text-xs text-gray-400 mt-0.5">{agg.items.join(' + ')}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {allPeople.map(fromPerson => {
+                  const otherPeople = allPeople.filter(p => p !== fromPerson);
+                  return (
+                    <div key={fromPerson} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col gap-2">
+                      <div className="flex items-center gap-2.5 mb-1 pb-2 border-b border-gray-100">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-black uppercase text-xs">
+                          {fromPerson[0]}
+                        </div>
+                        <span className="font-bold text-gray-800 capitalize text-sm">{fromPerson}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {otherPeople.map(toPerson => {
+                          const amount = netDebts[fromPerson]?.[toPerson] || 0;
+                          const hasDebt = amount > 0.01;
+                          return (
+                            <div key={toPerson} className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-gray-400">→</span>
+                                <span className="font-semibold text-gray-600 capitalize">{toPerson}</span>
+                              </div>
+                              <span className={`font-mono font-bold px-2 py-0.5 rounded-full text-[10px] ${
+                                hasDebt 
+                                  ? 'bg-red-50 text-red-600 border border-red-100' 
+                                  : 'bg-gray-50 text-gray-400 border border-gray-100'
+                              }`}>
+                                {currency}{amount.toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400 text-sm">pays total</span>
-                      <span className="bg-red-100 text-red-700 font-bold px-3 py-1 rounded-full text-sm">{currency}{agg.total.toFixed(2)}</span>
-                      <span className="text-gray-400">→</span>
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-sm uppercase shrink-0">{agg.to[0]}</div>
-                      <span className="font-semibold text-gray-800 capitalize">{agg.to}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
