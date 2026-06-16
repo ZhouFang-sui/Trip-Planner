@@ -93,7 +93,7 @@ export default function ItineraryTab({ waypoints = [], onPlaceClick, plans, setP
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="bg-gray-50/60">
-                    <th className="py-2 pl-4 pr-2 text-gray-400 font-semibold uppercase text-xs w-48">Time</th>
+                    <th className="py-2 pl-4 pr-2 text-gray-400 font-semibold uppercase text-xs w-60">Time</th>
                     <th className="py-2 px-2 text-gray-400 font-semibold uppercase text-xs">Place</th>
                     <th className="py-2 px-2 text-gray-400 font-semibold uppercase text-xs">Note</th>
                     {isUnsched && <th className="py-2 px-2 text-gray-400 font-semibold uppercase text-xs w-28">Assign Date</th>}
@@ -104,10 +104,10 @@ export default function ItineraryTab({ waypoints = [], onPlaceClick, plans, setP
                   {grouped[date].slice().sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')).map(plan => (
                     <tr key={plan.id} className="group hover:bg-blue-50/30 transition-colors border-t border-gray-100">
                       <td className="py-1.5 pl-4 pr-2">
-                        <div className="flex items-center gap-1.5 min-w-[170px]">
-                          <input type="time" value={plan.startTime || ''} onChange={e => updatePlan(plan.id, 'startTime', e.target.value)} className="bg-transparent border border-transparent hover:border-gray-200 focus:border-blue-500 focus:bg-white rounded px-2 py-1 outline-none transition-all text-gray-700 text-sm w-[76px]" />
+                        <div className="flex items-center gap-1.5 min-w-[240px]">
+                          <input type="time" value={plan.startTime || ''} onChange={e => updatePlan(plan.id, 'startTime', e.target.value)} className="bg-transparent border border-transparent hover:border-gray-200 focus:border-blue-500 focus:bg-white rounded px-2 py-1 outline-none transition-all text-gray-700 text-sm w-28" />
                           <span className="text-gray-400 text-xs font-bold font-mono">~</span>
-                          <input type="time" value={plan.endTime || ''} onChange={e => updatePlan(plan.id, 'endTime', e.target.value)} className="bg-transparent border border-transparent hover:border-gray-200 focus:border-blue-500 focus:bg-white rounded px-2 py-1 outline-none transition-all text-gray-700 text-sm w-[76px]" />
+                          <input type="time" value={plan.endTime || ''} onChange={e => updatePlan(plan.id, 'endTime', e.target.value)} className="bg-transparent border border-transparent hover:border-gray-200 focus:border-blue-500 focus:bg-white rounded px-2 py-1 outline-none transition-all text-gray-700 text-sm w-28" />
                         </div>
                       </td>
                       <td className="py-1.5 px-2 relative">
