@@ -161,17 +161,22 @@ export default function ExpenseTab({ currency = '$', expenses, setExpenses, itin
                   <tr key={exp.id} className="group hover:bg-gray-50 transition-colors border-t border-gray-50">
                     <td className="py-2 pl-2 pr-1 flex flex-col gap-1">
                       <input type="date" value={exp.date} onChange={e => updateExpense(exp.id, 'date', e.target.value)} className="w-full bg-transparent text-xs text-gray-500 outline-none focus:bg-white border border-transparent focus:border-emerald-300 rounded px-1 py-0.5" />
-                      {(() => {
-                        const idx = itineraryDates.indexOf(exp.date);
-                        if (idx !== -1) {
-                          return (
-                            <span className="text-[10px] w-fit font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded shadow-sm border border-emerald-200">
-                              Day {idx + 1}
-                            </span>
-                          );
-                        }
-                        return null;
-                      })()}
+                      <select
+                        value={itineraryDates.indexOf(exp.date) !== -1 ? exp.date : 'custom'}
+                        onChange={e => {
+                          if (e.target.value !== 'custom') {
+                            updateExpense(exp.id, 'date', e.target.value);
+                          }
+                        }}
+                        className="text-[10px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded px-1.5 py-0.5 outline-none cursor-pointer w-full transition"
+                      >
+                        <option value="custom" className="text-gray-400 font-normal">Select Day...</option>
+                        {itineraryDates.map((d, idx) => (
+                          <option key={d} value={d} className="text-gray-700 font-semibold">
+                            Day {idx + 1} ({new Date(d + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })})
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="py-2 px-2"><input value={exp.title} onChange={e => updateExpense(exp.id, 'title', e.target.value)} placeholder="Title" className="w-full bg-transparent outline-none border border-transparent focus:border-emerald-300 focus:bg-white rounded px-1 py-0.5 font-medium" /></td>
                     <td className="py-2 px-2"><input type="number" value={exp.amount || ''} onChange={e => updateExpense(exp.id, 'amount', e.target.value)} placeholder="0.00" className="w-20 bg-transparent outline-none border border-transparent focus:border-emerald-300 focus:bg-white rounded px-1 py-0.5 font-semibold text-emerald-600" /></td>
