@@ -250,7 +250,7 @@ async def get_place_info(req: PlaceRequest):
     # Try calling Google GenAI API if client is available
     if os.getenv("GEMINI_API_KEY") and client:
         import asyncio
-        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-lite-latest"]
         prompt = (
             f"Generate travel insights for the destination: \"{name}\".\n"
             "Provide the response in raw JSON format with the following keys:\n"
@@ -345,7 +345,7 @@ async def ai_chat(req: ChatMessage):
     
     if os.getenv("GEMINI_API_KEY") and client:
         import asyncio
-        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-lite-latest"]
         
         for model in models_to_try:
             retries = 2

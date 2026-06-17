@@ -417,6 +417,8 @@ export default function MapContainer({
   // Synchronize hover state with marker animation
   useEffect(() => {
     if (!map || !markersRef.current) return;
+    if (!window.google || !window.google.maps || !window.google.maps.Animation) return;
+    
     waypoints.forEach((wp, index) => {
       const marker = markersRef.current[index];
       if (!marker) return;
