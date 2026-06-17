@@ -35,9 +35,10 @@ def create_zip():
                 else:
                     zf.write(file_path, arcname=arcname)
                     
-        # Append videos if they exist, similar to zip_script.py
+        # Append videos and PPT if they exist, similar to zip_script.py
         video1 = r"C:\Users\Sui\Downloads\Program Test.mp4"
         video2 = r"C:\Users\Sui\Downloads\Trip-Planner-5.mp4"
+        ppt_file = r"C:\Users\Sui\Downloads\Trip-Planner-2.pptx"
         
         if os.path.exists(video1):
             print(f"Adding {video1}")
@@ -45,6 +46,9 @@ def create_zip():
         if os.path.exists(video2):
             print(f"Adding {video2}")
             zf.write(video2, arcname="專案報告/Trip-Planner-5.mp4")
+        if os.path.exists(ppt_file):
+            print(f"Adding {ppt_file}")
+            zf.write(ppt_file, arcname="專案報告/Trip-Planner-2.pptx")
             
     print("Zip creation completed!")
 
